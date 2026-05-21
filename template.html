@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    /* ── Página A4 ── */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: white;
+    }
+
+    /* ── Una página A4 = dos mitades A5 ── */
+    .page {
+      width: 210mm;
+      height: 297mm;
+      display: flex;
+      flex-direction: column;
+      page-break-after: always;
+    }
+    .page:last-child {
+      page-break-after: auto;
+    }
+
+    /* ── Cada mitad ocupa exactamente A5 ── */
+    .card-wrapper {
+      width: 210mm;
+      height: 148.5mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8mm;
+      border-bottom: 1px dashed #aaa;
+    }
+    .card-wrapper:last-child {
+      border-bottom: none;
+    }
+
+    /* ── Cartón ── */
+    .card {
+      width: 100%;
+      height: 100%;
+      border: 3px solid #1a1a2e;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Cabecera del cartón ── */
+    .card-header {
+      background: #1a1a2e;
+      color: #f5c518;
+      text-align: center;
+      padding: 4mm 0;
+    }
+    .card-header h1 {
+      font-size: 22pt;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+    .card-header p {
+      font-size: 9pt;
+      color: #ccc;
+      letter-spacing: 1px;
+      margin-top: 1mm;
+    }
+
+    /* ── Grid 2×5 ── */
+    .card-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+    }
+
+    /* ── Celda base ── */
+    .cell {
+      border: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3mm;
+      text-align: center;
+      min-height: 0;
+    }
+
+    /* ── Celda de canción ── */
+    .cell-song {
+      background: #fafafa;
+    }
+    .cell-song .artist {
+      font-size: 7pt;
+      font-weight: 700;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1.5mm;
+      line-height: 1.2;
+    }
+    .cell-song .title {
+      font-size: 9pt;
+      font-weight: 400;
+      color: #1a1a2e;
+      line-height: 1.3;
+    }
+
+    /* ── Celda de relleno ── */
+    .cell-filler {
+      background: #1a1a2e;
+      color: #f5c518;
+      font-size: 28pt;
+    }
+  </style>
+</head>
+<body>
+  {% for page in pages %}
+  <div class="page">
+
+    {% for position in ['top', 'bottom'] %}
+    <div class="card-wrapper">
+      <div class="card">
+        <div class="card-header">
+          <h1>🎵 Bingo Musical</h1>
+          <p>Tacha cuando suene la canción</p>
+        </div>
+        <div class="card-grid">
+          {% for row in page[position] %}
+            {% for cell in row %}
+              {% if cell.type == 'song' %}
+              <div class="cell cell-song">
+                <span class="artist">{{ cell.artist }}</span>
+                <span class="title">{{ cell.title }}</span>
+              </div>
+              {% else %}
+              <div class="cell cell-filler">
+                <span>{{ cell.symbol }}</span>
+              </div>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+  {% endfor %}
+</body>
+</html>
