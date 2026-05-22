@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    /* ── Página A4 ── */
     @page {
       size: A4 portrait;
       margin: 0;
@@ -16,8 +15,10 @@
     }
 
     body {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background: white;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     /* ── Una página A4 = dos mitades A5 ── */
@@ -39,8 +40,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 8mm;
-      border-bottom: 1px dashed #aaa;
+      padding: 7mm;
+      border-bottom: 1px dashed rgba(122, 158, 126, 0.4);
     }
     .card-wrapper:last-child {
       border-bottom: none;
@@ -50,31 +51,59 @@
     .card {
       width: 100%;
       height: 100%;
-      border: 3px solid #1a1a2e;
+      border: 1.5px solid rgba(122, 158, 126, 0.5);
       border-radius: 8px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      background: white;
     }
 
-    /* ── Cabecera del cartón ── */
+    /* ── Cabecera ── */
     .card-header {
-      background: #1a1a2e;
-      color: #f5c518;
+      background: white;
       text-align: center;
-      padding: 4mm 0;
+      padding: 3mm 4mm 2.5mm;
+      border-bottom: 1px solid rgba(122, 158, 126, 0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5mm;
     }
-    .card-header h1 {
-      font-size: 22pt;
-      font-weight: 900;
-      letter-spacing: 4px;
+
+    .card-header__pre {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 6.5pt;
       text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: #6B6B6B;
     }
-    .card-header p {
-      font-size: 9pt;
-      color: #ccc;
-      letter-spacing: 1px;
-      margin-top: 1mm;
+
+    .card-header__names {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 20pt;
+      font-weight: normal;
+      letter-spacing: -0.01em;
+      color: #2C2C2C;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.25em;
+    }
+
+    .card-header__amp {
+      font-size: 0.55em;
+      color: #7A9E7E;
+      line-height: 1;
+    }
+
+    .card-header__sub {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 6pt;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #9B9B9B;
+      margin-top: 0.5mm;
     }
 
     /* ── Grid 2×5 ── */
@@ -87,41 +116,39 @@
 
     /* ── Celda base ── */
     .cell {
-      border: 1px solid #ccc;
+      border: 1px solid rgba(122, 158, 126, 0.2);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 3mm;
+      padding: 2.5mm;
       text-align: center;
       min-height: 0;
+      background: white;
     }
 
     /* ── Celda de canción ── */
-    .cell-song {
-      background: #fafafa;
-    }
     .cell-song .artist {
-      font-size: 7pt;
-      font-weight: 700;
-      color: #555;
+      font-size: 5.5pt;
+      font-weight: 600;
+      color: #6B6B6B;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       margin-bottom: 1.5mm;
       line-height: 1.2;
     }
     .cell-song .title {
-      font-size: 9pt;
-      font-weight: 400;
-      color: #1a1a2e;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 8pt;
+      font-weight: normal;
+      color: #2C2C2C;
       line-height: 1.3;
     }
 
     /* ── Celda de relleno ── */
     .cell-filler {
-      background: #1a1a2e;
-      color: #f5c518;
-      font-size: 28pt;
+      color: #7A9E7E;
+      font-size: 22pt;
     }
   </style>
 </head>
@@ -133,8 +160,13 @@
     <div class="card-wrapper">
       <div class="card">
         <div class="card-header">
-          <h1>🎵 Bingo Musical</h1>
-          <p>Tacha cuando suene la canción</p>
+          <p class="card-header__pre">Bingo musical</p>
+          <h1 class="card-header__names">
+            <span>Marta</span>
+            <span class="card-header__amp">&amp;</span>
+            <span>Dani</span>
+          </h1>
+          <p class="card-header__sub">Tacha cuando suene la canción</p>
         </div>
         <div class="card-grid">
           {% for row in page[position] %}
