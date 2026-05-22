@@ -1,0 +1,13 @@
+[project]
+name = "bingo"
+version = "0.1.0"
+description = "Generador de cartones de bingo musical para Marta & Dani"
+requires-python = ">=3.11"
+dependencies = [
+    "jinja2>=3.1.6",
+    "pandas>=3.0.3",
+    "weasyprint>=68.1",
+]
+
+[project.scripts]
+bingo = "generate_bingo:main"

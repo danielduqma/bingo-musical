@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-# /// script
-# requires-python = ">=3.11"
-# dependencies = [
-#   "jinja2",
-#   "weasyprint",
-#   "pandas",
-# ]
-# ///
 
 import argparse
 import csv
@@ -20,37 +12,41 @@ from weasyprint import HTML
 FILLER_SYMBOLS = ["♪", "★", "♫", "🎵", "🎶", "🎸", "🎤"]
 CARD_ROWS = 2
 CARD_COLS = 5
-SONGS_PER_CARD = 7
-TOTAL_CELLS = CARD_ROWS * CARD_COLS  # 10
+MIN_SONGS_PER_ROW = 3
+MAX_SONGS_PER_ROW = 4
 
 
 def load_songs(csv_path: Path) -> list[dict]:
     songs = []
     with open(csv_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        for row in reader:
+        for i, row in enumerate(reader, start=1):
             artist = row.get("Grupo/artista", "").strip()
             title = row.get("Canción", "").strip()
             if artist and title:
-                songs.append({"artist": artist, "title": title})
-    if len(songs) < SONGS_PER_CARD:
+                songs.append({"artist": artist, "title": title, "index": i})
+    if len(songs) < CARD_ROWS * MAX_SONGS_PER_ROW:
         print(
-            f"Error: se necesitan al menos {SONGS_PER_CARD} canciones en el CSV.",
+            f"Error: se necesitan al menos {CARD_ROWS * MAX_SONGS_PER_ROW} canciones en el CSV.",
             file=sys.stderr,
         )
         sys.exit(1)
     return songs
 
 
-def build_card(songs: list[dict], rng: random.Random) -> list[list[dict | None]]:
-    chosen = rng.sample(songs, SONGS_PER_CARD)
-    filler_symbols = rng.choices(FILLER_SYMBOLS, k=TOTAL_CELLS - SONGS_PER_CARD)
-
-    cells: list[dict | None] = [{"type": "song", **s} for s in chosen]
-    cells += [{"type": "filler", "symbol": sym} for sym in filler_symbols]
-    rng.shuffle(cells)
-
-    rows = [cells[i * CARD_COLS : (i + 1) * CARD_COLS] for i in range(CARD_ROWS)]
+def build_card(songs: list[dict], rng: random.Random) -> list[list[dict]]:
+    rows = []
+    used: set[int] = set()
+    for _ in range(CARD_ROWS):
+        n_songs = rng.randint(MIN_SONGS_PER_ROW, MAX_SONGS_PER_ROW)
+        available = [s for s in songs if s["index"] not in used]
+        chosen = rng.sample(available, n_songs)
+        used.update(s["index"] for s in chosen)
+        n_fillers = CARD_COLS - n_songs
+        cells = [{"type": "song", **s} for s in chosen]
+        cells += [{"type": "filler"} for _ in range(n_fillers)]
+        rng.shuffle(cells)
+        rows.append(cells)
     return rows
 
 

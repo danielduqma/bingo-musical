@@ -16,12 +16,10 @@
 
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      background: white;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
 
-    /* ── Una página A4 = dos mitades A5 ── */
     .page {
       width: 210mm;
       height: 297mm;
@@ -33,55 +31,49 @@
       page-break-after: auto;
     }
 
-    /* ── Cada mitad ocupa exactamente A5 ── */
     .card-wrapper {
       width: 210mm;
       height: 148.5mm;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 7mm;
+      padding: 8mm 10mm;
       border-bottom: 1px dashed rgba(122, 158, 126, 0.4);
     }
     .card-wrapper:last-child {
       border-bottom: none;
     }
 
-    /* ── Cartón ── */
+    /* ── Cartón: sin borde exterior ── */
     .card {
       width: 100%;
       height: 100%;
-      border: 1.5px solid rgba(122, 158, 126, 0.5);
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: white;
-    }
-
-    /* ── Cabecera ── */
-    .card-header {
-      background: white;
-      text-align: center;
-      padding: 3mm 4mm 2.5mm;
-      border-bottom: 1px solid rgba(122, 158, 126, 0.25);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.5mm;
+      gap: 3mm;
+    }
+
+    /* ── Cabecera sin recuadro ── */
+    .card-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1mm;
     }
 
     .card-header__pre {
       font-family: system-ui, -apple-system, sans-serif;
-      font-size: 6.5pt;
+      font-size: 7pt;
       text-transform: uppercase;
-      letter-spacing: 0.22em;
+      letter-spacing: 0.24em;
       color: #6B6B6B;
     }
 
     .card-header__names {
       font-family: Georgia, 'Times New Roman', serif;
-      font-size: 20pt;
+      font-size: 24pt;
       font-weight: normal;
       letter-spacing: -0.01em;
       color: #2C2C2C;
@@ -98,57 +90,89 @@
     }
 
     .card-header__sub {
-      font-family: system-ui, -apple-system, sans-serif;
-      font-size: 6pt;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      color: #9B9B9B;
-      margin-top: 0.5mm;
+      display: none;
     }
 
-    /* ── Grid 2×5 ── */
-    .card-grid {
+    /* ── Leyenda inferior ── */
+    .card-legend {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 6.5pt;
+      letter-spacing: 0.08em;
+      color: #9B9B9B;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* ── Área de filas ── */
+    .card-rows {
       flex: 1;
       display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 4mm;
+      width: 100%;
+      min-height: 0;
+    }
+
+    /* ── Fila con borde ── */
+    .card-row {
+      display: grid;
       grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(2, 1fr);
+      border: 1.5px solid rgba(122, 158, 126, 0.5);
+      border-radius: 6px;
+      overflow: hidden;
+      min-height: 0;
     }
 
     /* ── Celda base ── */
     .cell {
-      border: 1px solid rgba(122, 158, 126, 0.2);
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2.5mm;
+      padding: 4mm 3mm;
       text-align: center;
       min-height: 0;
-      background: white;
+      border-right: 1px solid rgba(122, 158, 126, 0.25);
+    }
+    .cell:last-child {
+      border-right: none;
     }
 
     /* ── Celda de canción ── */
     .cell-song .artist {
-      font-size: 5.5pt;
+      font-size: 7.5pt;
       font-weight: 600;
       color: #6B6B6B;
       text-transform: uppercase;
       letter-spacing: 0.4px;
-      margin-bottom: 1.5mm;
+      margin-bottom: 2mm;
       line-height: 1.2;
     }
     .cell-song .title {
       font-family: Georgia, 'Times New Roman', serif;
-      font-size: 8pt;
+      font-size: 12pt;
       font-weight: normal;
       color: #2C2C2C;
       line-height: 1.3;
     }
 
+    .cell-song .song-index {
+      position: absolute;
+      top: 2mm;
+      right: 2.5mm;
+      font-size: 7.5pt;
+      font-family: Georgia, 'Times New Roman', serif;
+      color: #BBBBBB;
+      line-height: 1;
+    }
+
     /* ── Celda de relleno ── */
     .cell-filler {
-      color: #7A9E7E;
-      font-size: 22pt;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 32pt;
+      color: rgba(122, 158, 126, 0.35);
+      font-weight: normal;
     }
   </style>
 </head>
@@ -166,24 +190,28 @@
             <span class="card-header__amp">&amp;</span>
             <span>Dani</span>
           </h1>
-          <p class="card-header__sub">Tacha cuando suene la canción</p>
+          <p class="card-header__sub">Pon la pegatina en el recuadro de cada canción cuando suene</p>
         </div>
-        <div class="card-grid">
+        <div class="card-rows">
           {% for row in page[position] %}
+          <div class="card-row">
             {% for cell in row %}
               {% if cell.type == 'song' %}
               <div class="cell cell-song">
+                <span class="song-index">#{{ cell.index }}</span>
                 <span class="artist">{{ cell.artist }}</span>
                 <span class="title">{{ cell.title }}</span>
               </div>
               {% else %}
               <div class="cell cell-filler">
-                <span>{{ cell.symbol }}</span>
+                <span>&amp;</span>
               </div>
               {% endif %}
             {% endfor %}
+          </div>
           {% endfor %}
         </div>
+        <p class="card-legend">Pon la pegatina en el recuadro de cada canción cuando suene</p>
       </div>
     </div>
     {% endfor %}
