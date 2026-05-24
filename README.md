@@ -82,31 +82,37 @@ ABBA,Dancing Queen,
 Al ejecutar con este CSV, el modo duración se activa automáticamente:
 
 ```
-Modo duración activo: bingo garantizado en la canción #8 ("Creep" – Radiohead).
-La carta ganadora está en la parte superior de la primera página.
+Modo duración activo:
+  · Línea en canción #4: "Smells Like Teen Spirit" – Nirvana (cartón de línea: página 1)
+  · Bingo en canción #8: "Creep" – Radiohead (cartón de bingo: página 1)
+  · El cartón de línea y el cartón de bingo son distintos.
 ```
 
 ### Cómo funciona internamente
 
-El generador produce dos tipos de cartones:
+El generador produce **tres tipos de cartones**:
 
-**Carta ganadora** *(siempre en la parte superior de la primera página)*
+**Cartón de línea** *(posición 1 de la primera página)*
 
-Todas sus 7 canciones pertenecen a la secuencia ordenada. Las dos filas están diseñadas para completarse en momentos distintos:
+- **Fila de línea**: canciones de posiciones 1..K, con la última siendo la canción K (K ≈ N/2). Se completa exactamente en la canción K → **primera línea de la partida**.
+- **Otra fila**: contiene al menos una canción de reserva (nunca anunciada) → **nunca puede completarse** → este cartón no puede hacer bingo.
 
-- **Fila de línea**: contiene canciones de posiciones 1..K, con la última siendo la canción K (≈ N/2). Se completa exactamente en la canción K → primera línea de la partida.
-- **Fila de bingo**: contiene canciones del resto de la secuencia, con la última siendo la canción N. Se completa en la canción N → bingo (las 7 canciones del cartón).
+**Cartón de bingo** *(posición 2 de la primera página)*
 
-Esto garantiza que no habrá dos líneas simultáneas: la fila de línea completa en K, la de bingo en N, y solo el cartón ganador puede puntuar.
+Todas sus 7 canciones pertenecen a la secuencia ordenada:
+
+- **Fila pre-bingo**: contiene al menos una canción de posiciones K+1..N-1, por lo que se completa **después de K** (no roba la línea) pero antes del bingo.
+- **Fila de bingo**: contiene la canción N (última de la secuencia). Se completa en la canción N → **bingo**.
 
 **Cartones normales** *(resto de páginas)*
 
-En modo duración, cada fila incluye obligatoriamente al menos una canción de reserva (nunca anunciada). Esto garantiza que **ningún cartón normal puede línear ni hacer bingo** durante la secuencia de N canciones.
+Cada fila incluye obligatoriamente al menos una canción de reserva. Ningún cartón normal puede línear ni hacer bingo durante la secuencia.
 
-El resultado: un único ganador posible, que consigue línea en la canción K y bingo en la canción N.
+El resultado: **dos ganadores distintos** — uno consigue la línea en la canción K y otro el bingo en la canción N.
 
 ### Reglas del CSV en modo duración
 
 - Los valores de `Orden` deben ser una secuencia contigua sin huecos ni duplicados: `1, 2, 3, …, N`.
-- Se necesitan al menos **7 canciones con `Orden`** (para rellenar el cartón ganador completo).
-- Se necesitan al menos **2 canciones de reserva** (sin `Orden`) para los cartones normales.
+- Se necesitan al menos **7 canciones con `Orden`** (para rellenar el cartón de bingo con canciones ordenadas).
+- Se necesita al menos **1 canción de reserva** (sin `Orden`) para la fila extra del cartón de línea.
+- Se necesitan al menos **2 cartones** (`--count 2`): uno para línea y otro para bingo.
