@@ -1,0 +1,107 @@
+# 🎵 Bingo Musical
+
+Generador de cartones de bingo musical en PDF. Cada cartón tiene dos filas de canciones; el jugador marca las que van sonando y gana cuando completa una fila entera.
+
+## Requisitos
+
+- Python 3.11+
+- [uv](https://docs.astral.sh/uv/)
+
+## Uso básico
+
+```bash
+uv run --with weasyprint,jinja2 python3 generate_bingo.py songs.csv
+```
+
+Genera un PDF con una página (2 cartones) en `output/bingo.pdf`.
+
+### Opciones
+
+| Opción | Por defecto | Descripción |
+|---|---|---|
+| `--count N` | `1` | Número de páginas A4 (2 cartones por página) |
+| `--output ruta` | `output/bingo.pdf` | Ruta del PDF de salida |
+| `--template ruta` | `template.html` | Plantilla HTML personalizada |
+| `--seed N` | aleatorio | Semilla para resultados reproducibles |
+
+```bash
+# 5 páginas (10 cartones), resultado reproducible
+uv run --with weasyprint,jinja2 python3 generate_bingo.py songs.csv --count 5 --seed 42
+```
+
+## Formato del CSV
+
+El CSV de canciones tiene dos columnas obligatorias y una opcional:
+
+```csv
+Grupo/artista,Canción,Orden
+Queen,Bohemian Rhapsody,1
+The Beatles,Hey Jude,2
+Radiohead,Creep,8
+The Rolling Stones,Paint It Black,
+ABBA,Dancing Queen,
+```
+
+- **`Grupo/artista`** y **`Canción`**: nombre del artista y título de la canción.
+- **`Orden`** *(opcional)*: número entero que indica el orden de reproducción (ver [Modo duración](#modo-duración)).
+
+Se necesitan al menos 8 canciones en el CSV.
+
+## Estructura de un cartón
+
+Cada cartón tiene **2 filas × 5 columnas**. En cada fila hay entre 3 y 4 canciones; el resto de celdas son relleno decorativo. Un cartón tiene 7 canciones en total (distribución 3+4 ó 4+3 aleatoria).
+
+El jugador marca las canciones según van sonando. **Bingo** = completar una fila entera.
+
+---
+
+## Modo duración
+
+Permite controlar exactamente cuándo se produce el bingo: marca las canciones que van a sonar y en qué orden, y el generador crea un cartón especial que **garantiza el bingo en la última canción**.
+
+### Cómo activarlo
+
+Añade la columna `Orden` al CSV y asigna valores enteros consecutivos (1, 2, 3…) a las canciones de la secuencia de juego. Las canciones **sin** valor en `Orden` son *canciones de reserva* y no se anuncian durante la partida.
+
+```csv
+Grupo/artista,Canción,Orden
+Queen,Bohemian Rhapsody,1
+The Beatles,Hey Jude,2
+Michael Jackson,Thriller,3
+Nirvana,Smells Like Teen Spirit,4
+David Bowie,Heroes,5
+Led Zeppelin,Stairway to Heaven,6
+Pink Floyd,Wish You Were Here,7
+Radiohead,Creep,8          ← el bingo ocurre aquí
+The Rolling Stones,Paint It Black,   ← canciones de reserva
+Fleetwood Mac,Go Your Own Way,
+ABBA,Dancing Queen,
+```
+
+Al ejecutar con este CSV, el modo duración se activa automáticamente:
+
+```
+Modo duración activo: bingo garantizado en la canción #8 ("Creep" – Radiohead).
+La carta ganadora está en la parte superior de la primera página.
+```
+
+### Cómo funciona internamente
+
+El generador produce dos tipos de cartones:
+
+**Carta ganadora** *(siempre en la parte superior de la primera página)*
+
+- **Fila ganadora**: contiene la canción Nº N (la última de la secuencia) junto con otras canciones de la secuencia (posiciones 1..N-1). Esta fila se completa exactamente cuando suena la canción N, y no antes.
+- **Fila perdedora**: contiene al menos una canción de reserva (nunca se anuncia), por lo que nunca puede completarse durante la partida.
+
+**Cartones normales** *(resto de páginas)*
+
+En modo duración, cada fila de los cartones normales incluye obligatoriamente al menos una canción de reserva. Esto garantiza que **ningún cartón normal puede hacer bingo** durante la secuencia de N canciones: siempre les faltará la canción de reserva.
+
+El resultado es una partida con un único ganador posible, que ganará exactamente en el momento de la canción N.
+
+### Reglas del CSV en modo duración
+
+- Los valores de `Orden` deben ser una secuencia contigua sin huecos ni duplicados: `1, 2, 3, …, N`.
+- Se necesitan al menos **3 canciones con `Orden`** (para la fila ganadora).
+- Se necesitan al menos **2 canciones de reserva** (sin `Orden`) para los cartones normales.
