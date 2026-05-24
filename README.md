@@ -51,7 +51,8 @@ Se necesitan al menos 8 canciones en el CSV.
 
 Cada cartón tiene **2 filas × 5 columnas**. En cada fila hay entre 3 y 4 canciones; el resto de celdas son relleno decorativo. Un cartón tiene 7 canciones en total (distribución 3+4 ó 4+3 aleatoria).
 
-El jugador marca las canciones según van sonando. **Bingo** = completar una fila entera.
+- **Línea**: se completa una fila entera (3 o 4 canciones).
+- **Bingo**: se completan las 7 canciones del cartón (ambas filas).
 
 ---
 
@@ -91,17 +92,21 @@ El generador produce dos tipos de cartones:
 
 **Carta ganadora** *(siempre en la parte superior de la primera página)*
 
-- **Fila ganadora**: contiene la canción Nº N (la última de la secuencia) junto con otras canciones de la secuencia (posiciones 1..N-1). Esta fila se completa exactamente cuando suena la canción N, y no antes.
-- **Fila perdedora**: contiene al menos una canción de reserva (nunca se anuncia), por lo que nunca puede completarse durante la partida.
+Todas sus 7 canciones pertenecen a la secuencia ordenada. Las dos filas están diseñadas para completarse en momentos distintos:
+
+- **Fila de línea**: contiene canciones de posiciones 1..K, con la última siendo la canción K (≈ N/2). Se completa exactamente en la canción K → primera línea de la partida.
+- **Fila de bingo**: contiene canciones del resto de la secuencia, con la última siendo la canción N. Se completa en la canción N → bingo (las 7 canciones del cartón).
+
+Esto garantiza que no habrá dos líneas simultáneas: la fila de línea completa en K, la de bingo en N, y solo el cartón ganador puede puntuar.
 
 **Cartones normales** *(resto de páginas)*
 
-En modo duración, cada fila de los cartones normales incluye obligatoriamente al menos una canción de reserva. Esto garantiza que **ningún cartón normal puede hacer bingo** durante la secuencia de N canciones: siempre les faltará la canción de reserva.
+En modo duración, cada fila incluye obligatoriamente al menos una canción de reserva (nunca anunciada). Esto garantiza que **ningún cartón normal puede línear ni hacer bingo** durante la secuencia de N canciones.
 
-El resultado es una partida con un único ganador posible, que ganará exactamente en el momento de la canción N.
+El resultado: un único ganador posible, que consigue línea en la canción K y bingo en la canción N.
 
 ### Reglas del CSV en modo duración
 
 - Los valores de `Orden` deben ser una secuencia contigua sin huecos ni duplicados: `1, 2, 3, …, N`.
-- Se necesitan al menos **3 canciones con `Orden`** (para la fila ganadora).
+- Se necesitan al menos **7 canciones con `Orden`** (para rellenar el cartón ganador completo).
 - Se necesitan al menos **2 canciones de reserva** (sin `Orden`) para los cartones normales.
