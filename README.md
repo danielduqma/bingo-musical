@@ -19,14 +19,14 @@ Genera un PDF con una página (2 cartones) en `output/bingo.pdf`.
 
 | Opción | Por defecto | Descripción |
 |---|---|---|
-| `--count N` | `1` | Número de páginas A4 (2 cartones por página) |
+| `--count N` | `1` | Número de cartones a generar (2 por página A4) |
 | `--output ruta` | `output/bingo.pdf` | Ruta del PDF de salida |
 | `--template ruta` | `template.html` | Plantilla HTML personalizada |
 | `--seed N` | aleatorio | Semilla para resultados reproducibles |
 
 ```bash
-# 5 páginas (10 cartones), resultado reproducible
-uv run --with weasyprint,jinja2 python3 generate_bingo.py songs.csv --count 5 --seed 42
+# 5 páginas A4 con 10 cartones, resultado reproducible
+uv run --with weasyprint,jinja2 python3 generate_bingo.py songs.csv --count 10 --seed 42
 ```
 
 ## Formato del CSV

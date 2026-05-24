@@ -269,26 +269,26 @@ def generate_pdf(
     env = Environment(loader=FileSystemLoader(str(template_path.parent)))
     template = env.get_template(template_path.name)
 
-    pages = []
     seen_cards: set[frozenset[int]] = set()
     winner_placed = False
 
-    for _ in range(count):
+    def _next_card() -> list[list[dict]]:
+        nonlocal winner_placed
         if duration_mode and not winner_placed:
-            card_top = build_duration_card(ordered_songs, pool_songs, rng, seen_cards)
             winner_placed = True
-        else:
-            card_top = (
-                build_constrained_card(songs, pool_songs, rng, seen_cards)
-                if duration_mode
-                else build_card(songs, rng, seen_cards, SONGS_PER_CARD)
-            )
-        card_bottom = (
-            build_constrained_card(songs, pool_songs, rng, seen_cards)
-            if duration_mode
-            else build_card(songs, rng, seen_cards, SONGS_PER_CARD)
-        )
-        pages.append({"top": card_top, "bottom": card_bottom})
+            return build_duration_card(ordered_songs, pool_songs, rng, seen_cards)
+        if duration_mode:
+            return build_constrained_card(songs, pool_songs, rng, seen_cards)
+        return build_card(songs, rng, seen_cards, SONGS_PER_CARD)
+
+    cards = [_next_card() for _ in range(count)]
+
+    pages = []
+    for i in range(0, len(cards), 2):
+        pages.append({
+            "top": cards[i],
+            "bottom": cards[i + 1] if i + 1 < len(cards) else None,
+        })
 
     html_content = template.render(pages=pages)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -296,6 +296,7 @@ def generate_pdf(
         str(output_path)
     )
 
+    n_pages = len(pages)
     if duration_mode:
         last = ordered_songs[-1]
         n = len(ordered_songs)
@@ -304,7 +305,7 @@ def generate_pdf(
             f'("{last["title"]}" – {last["artist"]}). '
             "La carta ganadora está en la parte superior de la primera página."
         )
-    print(f"PDF generado: {output_path} ({count} página(s), {count * 2} cartones)")
+    print(f"PDF generado: {output_path} ({n_pages} página(s), {count} cartones)")
 
 
 def main() -> None:
@@ -326,7 +327,7 @@ def main() -> None:
         "--count",
         type=int,
         default=1,
-        help="Número de páginas A4 a generar (2 cartones por página)",
+        help="Número de cartones a generar (2 cartones por página A4)",
     )
     parser.add_argument(
         "--seed",

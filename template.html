@@ -181,6 +181,7 @@
   <div class="page">
 
     {% for position in ['top', 'bottom'] %}
+    {% if page[position] is not none %}
     <div class="card-wrapper">
       <div class="card">
         <div class="card-header">
@@ -214,6 +215,7 @@
         <p class="card-legend">Pon la pegatina en el recuadro de cada canción cuando suene</p>
       </div>
     </div>
+    {% endif %}
     {% endfor %}
 
   </div>
