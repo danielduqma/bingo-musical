@@ -129,9 +129,9 @@ def build_linea_card(
     rng: random.Random,
     seen_cards: set[frozenset[int]],
 ) -> tuple[list[list[dict]], int]:
-    """Build the card that wins línea at song K ≈ N/2.
+    """Build the card that wins primera línea at song K ≈ N/2.
 
-    - Línea row: all songs from positions 1..K, trigger at K.
+    - Línea row: songs from positions 1..K, trigger at K.
     - Other row: ≥1 pool song (never announced) → can never complete → can never win bingo.
 
     Returns (rows, K).
@@ -139,53 +139,105 @@ def build_linea_card(
     N = len(ordered_songs)
     K = (N + 1) // 2
 
-    # linea_size needs K - 1 songs before the trigger (positions 1..K-1)
     feasible = [
         (ls, SONGS_PER_CARD - ls)
         for ls in [MIN_SONGS_PER_ROW, MAX_SONGS_PER_ROW]
         if K >= ls
     ]
-    linea_size, other_size = rng.choice(feasible)
 
-    linea_trigger = ordered_songs[K - 1]
-    linea_others = rng.sample(ordered_songs[:K - 1], linea_size - 1)
-    linea_songs = linea_others + [linea_trigger]
+    for _ in range(1000):
+        linea_size, other_size = rng.choice(feasible)
 
-    # Other row: 1 pool song + rest from any available songs
-    used = {s["index"] for s in linea_songs}
-    pool_pick = rng.choice([s for s in pool_songs if s["index"] not in used])
-    used.add(pool_pick["index"])
-    rest = [s for s in (ordered_songs + pool_songs) if s["index"] not in used]
-    other_songs = [pool_pick] + rng.sample(rest, other_size - 1)
+        linea_trigger = ordered_songs[K - 1]
+        linea_others = rng.sample(ordered_songs[:K - 1], linea_size - 1)
+        linea_songs = linea_others + [linea_trigger]
 
-    linea_row = _build_row(linea_songs, linea_size, rng)
-    other_row = _build_row(other_songs, other_size, rng)
-    rows = [linea_row, other_row] if rng.random() < 0.5 else [other_row, linea_row]
+        used = {s["index"] for s in linea_songs}
+        pool_pick = rng.choice([s for s in pool_songs if s["index"] not in used])
+        used.add(pool_pick["index"])
+        rest = [s for s in (ordered_songs + pool_songs) if s["index"] not in used]
+        other_songs = [pool_pick] + rng.sample(rest, other_size - 1)
 
-    card_key = frozenset(s["index"] for s in linea_songs + other_songs)
-    seen_cards.add(card_key)
-    return rows, K
+        card_key = frozenset(s["index"] for s in linea_songs + other_songs)
+        if card_key not in seen_cards:
+            linea_row = _build_row(linea_songs, linea_size, rng)
+            other_row = _build_row(other_songs, other_size, rng)
+            rows = [linea_row, other_row] if rng.random() < 0.5 else [other_row, linea_row]
+            seen_cards.add(card_key)
+            return rows, K
+
+    raise RuntimeError(
+        "No se pudo generar el cartón de primera línea con combinación única."
+    )
+
+
+def build_segunda_linea_card(
+    ordered_songs: list[dict],
+    pool_songs: list[dict],
+    rng: random.Random,
+    seen_cards: set[frozenset[int]],
+) -> tuple[list[list[dict]], int]:
+    """Build the card that wins segunda línea at song K2 ≈ N*3/4.
+
+    - Línea row: songs from positions 1..K2, trigger at K2 (K2 > K1, so never fires at K1).
+    - Other row: ≥1 pool song (never announced) → can never complete → can never win bingo.
+
+    Returns (rows, K2).
+    """
+    N = len(ordered_songs)
+    K2 = (3 * N) // 4
+
+    feasible = [
+        (ls, SONGS_PER_CARD - ls)
+        for ls in [MIN_SONGS_PER_ROW, MAX_SONGS_PER_ROW]
+        if K2 >= ls
+    ]
+
+    for _ in range(1000):
+        linea_size, other_size = rng.choice(feasible)
+
+        linea_trigger = ordered_songs[K2 - 1]
+        linea_others = rng.sample(ordered_songs[:K2 - 1], linea_size - 1)
+        linea_songs = linea_others + [linea_trigger]
+
+        used = {s["index"] for s in linea_songs}
+        pool_pick = rng.choice([s for s in pool_songs if s["index"] not in used])
+        used.add(pool_pick["index"])
+        rest = [s for s in (ordered_songs + pool_songs) if s["index"] not in used]
+        other_songs = [pool_pick] + rng.sample(rest, other_size - 1)
+
+        card_key = frozenset(s["index"] for s in linea_songs + other_songs)
+        if card_key not in seen_cards:
+            linea_row = _build_row(linea_songs, linea_size, rng)
+            other_row = _build_row(other_songs, other_size, rng)
+            rows = [linea_row, other_row] if rng.random() < 0.5 else [other_row, linea_row]
+            seen_cards.add(card_key)
+            return rows, K2
+
+    raise RuntimeError(
+        "No se pudo generar el cartón de segunda línea con combinación única."
+    )
 
 
 def build_bingo_card(
     ordered_songs: list[dict],
-    linea_pos: int,
+    segunda_linea_pos: int,
     rng: random.Random,
     seen_cards: set[frozenset[int]],
 ) -> tuple[list[list[dict]], int]:
     """Build the card that wins bingo at song N (all 7 songs complete).
 
     All 7 songs come from the ordered sequence:
-    - Pre-bingo row: ≥1 song from positions K+1..N-1, so it completes AFTER the línea
-      winner fires at K. Never completes at N (song N is not in this row).
+    - Pre-bingo row: ≥1 song from positions K2+1..N-1, so it completes AFTER both línea
+      winners fire. Never completes at N (song N is not in this row).
     - Bingo row: contains last_song, completes at N triggering full bingo.
 
     Returns (rows, N).
     """
     N = len(ordered_songs)
     last_song = ordered_songs[-1]
-    # Songs strictly after the línea and before the bingo trigger (positions K+1..N-1)
-    after_linea = ordered_songs[linea_pos: N - 1]
+    # Songs strictly after the segunda línea and before the bingo trigger (positions K2+1..N-1)
+    after_segunda_linea = ordered_songs[segunda_linea_pos: N - 1]
 
     feasible = [
         (pre, SONGS_PER_CARD - pre)
@@ -193,8 +245,8 @@ def build_bingo_card(
     ]
     pre_size, bingo_size = rng.choice(feasible)
 
-    # Pre-bingo row: 1 anchor from after_linea + (pre_size - 1) others (not last_song)
-    anchor = rng.choice(after_linea)
+    # Pre-bingo row: 1 anchor from after_segunda_linea + (pre_size - 1) others (not last_song)
+    anchor = rng.choice(after_segunda_linea)
     used = {anchor["index"], last_song["index"]}
     rest_pre = [s for s in ordered_songs if s["index"] not in used]
     pre_songs = [anchor] + rng.sample(rest_pre, pre_size - 1)
@@ -269,6 +321,8 @@ def generate_pdf(
     output_path: Path,
     count: int,
     seed: int | None,
+    segunda_linea: bool = False,
+    cards_per_page: int = 2,
 ) -> None:
     rng = random.Random(seed)
     pool_songs = [s for s in songs if "orden" not in s]
@@ -285,14 +339,20 @@ def generate_pdf(
         if len(pool_songs) < 1:
             print(
                 "Error: se necesita al menos 1 canción sin Orden (canción de reserva) "
-                "para garantizar que el cartón de línea no pueda hacer bingo.",
+                "para garantizar que los cartones de línea no puedan hacer bingo.",
                 file=sys.stderr,
             )
             sys.exit(1)
-        if count < 2:
+        min_count = 3 if segunda_linea else 2
+        prize_desc = (
+            "uno para primera línea, uno para segunda línea y uno para bingo"
+            if segunda_linea
+            else "uno para línea y otro para bingo"
+        )
+        if count < min_count:
             print(
-                "Error: en modo duración se necesitan al menos 2 cartones (--count 2): "
-                "uno para línea y otro para bingo.",
+                f"Error: en modo duración se necesitan al menos {min_count} cartones "
+                f"(--count {min_count}): {prize_desc}.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -302,18 +362,25 @@ def generate_pdf(
 
     seen_cards: set[frozenset[int]] = set()
     linea_placed = False
+    segunda_linea_placed = False
     bingo_placed = False
     linea_pos: int = 0
+    segunda_linea_pos: int = 0
     bingo_pos: int = 0
 
     def _next_card() -> list[list[dict]]:
-        nonlocal linea_placed, bingo_placed, linea_pos, bingo_pos
+        nonlocal linea_placed, segunda_linea_placed, bingo_placed, linea_pos, segunda_linea_pos, bingo_pos
         if duration_mode and not linea_placed:
             rows, linea_pos = build_linea_card(ordered_songs, pool_songs, rng, seen_cards)
             linea_placed = True
             return rows
+        if duration_mode and segunda_linea and not segunda_linea_placed:
+            rows, segunda_linea_pos = build_segunda_linea_card(ordered_songs, pool_songs, rng, seen_cards)
+            segunda_linea_placed = True
+            return rows
         if duration_mode and not bingo_placed:
-            rows, bingo_pos = build_bingo_card(ordered_songs, linea_pos, rng, seen_cards)
+            anchor_pos = segunda_linea_pos if segunda_linea else linea_pos
+            rows, bingo_pos = build_bingo_card(ordered_songs, anchor_pos, rng, seen_cards)
             bingo_placed = True
             return rows
         if duration_mode:
@@ -323,13 +390,11 @@ def generate_pdf(
     cards = [_next_card() for _ in range(count)]
 
     pages = []
-    for i in range(0, len(cards), 2):
-        pages.append({
-            "top": cards[i],
-            "bottom": cards[i + 1] if i + 1 < len(cards) else None,
-        })
+    for i in range(0, len(cards), cards_per_page):
+        chunk = cards[i:i + cards_per_page]
+        pages.append({"cards": chunk})
 
-    html_content = template.render(pages=pages)
+    html_content = template.render(pages=pages, cards_per_page=cards_per_page)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     HTML(string=html_content, base_url=str(template_path.parent)).write_pdf(
         str(output_path)
@@ -337,18 +402,38 @@ def generate_pdf(
 
     n_pages = len(pages)
     if duration_mode:
-        linea_song = ordered_songs[linea_pos - 1]
+        primera_linea_song = ordered_songs[linea_pos - 1]
         bingo_song = ordered_songs[bingo_pos - 1]
-        print(
-            f"Modo duración activo:\n"
-            f"  · Línea en canción #{linea_pos}: "
-            f'"{linea_song["title"]}" – {linea_song["artist"]} '
-            f"(cartón de línea: página 1)\n"
-            f"  · Bingo en canción #{bingo_pos}: "
-            f'"{bingo_song["title"]}" – {bingo_song["artist"]} '
-            f"(cartón de bingo: página 1)\n"
-            "  · El cartón de línea y el cartón de bingo son distintos."
-        )
+        def _card_page(card_num: int) -> int:
+            return (card_num - 1) // cards_per_page + 1
+        if segunda_linea:
+            segunda_linea_song = ordered_songs[segunda_linea_pos - 1]
+            bingo_card_num = 3
+            print(
+                f"Modo duración activo:\n"
+                f"  · Primera línea en canción #{linea_pos}: "
+                f'"{primera_linea_song["title"]}" – {primera_linea_song["artist"]} '
+                f"(cartón 1, página {_card_page(1)})\n"
+                f"  · Segunda línea en canción #{segunda_linea_pos}: "
+                f'"{segunda_linea_song["title"]}" – {segunda_linea_song["artist"]} '
+                f"(cartón 2, página {_card_page(2)})\n"
+                f"  · Bingo en canción #{bingo_pos}: "
+                f'"{bingo_song["title"]}" – {bingo_song["artist"]} '
+                f"(cartón {bingo_card_num}, página {_card_page(bingo_card_num)})\n"
+                "  · Los tres cartones con premio son distintos."
+            )
+        else:
+            bingo_card_num = 2
+            print(
+                f"Modo duración activo:\n"
+                f"  · Línea en canción #{linea_pos}: "
+                f'"{primera_linea_song["title"]}" – {primera_linea_song["artist"]} '
+                f"(cartón 1, página {_card_page(1)})\n"
+                f"  · Bingo en canción #{bingo_pos}: "
+                f'"{bingo_song["title"]}" – {bingo_song["artist"]} '
+                f"(cartón {bingo_card_num}, página {_card_page(bingo_card_num)})\n"
+                "  · El cartón de línea y el cartón de bingo son distintos."
+            )
     print(f"PDF generado: {output_path} ({n_pages} página(s), {count} cartones)")
 
 
@@ -371,7 +456,7 @@ def main() -> None:
         "--count",
         type=int,
         default=1,
-        help="Número de cartones a generar (2 cartones por página A4)",
+        help="Número de cartones a generar",
     )
     parser.add_argument(
         "--seed",
@@ -379,10 +464,22 @@ def main() -> None:
         default=None,
         help="Semilla aleatoria para reproducibilidad",
     )
+    parser.add_argument(
+        "--por-pagina",
+        type=int,
+        default=2,
+        help="Número de cartones por página A4 (por defecto: 2)",
+    )
+    parser.add_argument(
+        "--segunda-linea",
+        action="store_true",
+        default=False,
+        help="En modo duración, incluir un cartón de segunda línea (~75%% de canciones)",
+    )
     args = parser.parse_args()
 
     songs, ordered_songs = load_songs(args.csv)
-    generate_pdf(songs, ordered_songs, args.template, args.output, args.count, args.seed)
+    generate_pdf(songs, ordered_songs, args.template, args.output, args.count, args.seed, args.segunda_linea, args.por_pagina)
 
 
 if __name__ == "__main__":

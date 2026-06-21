@@ -33,11 +33,11 @@
 
     .card-wrapper {
       width: 210mm;
-      height: 148.5mm;
+      height: {{ "%.4f"|format(297.0 / cards_per_page) }}mm;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 8mm 10mm;
+      padding: {{ "%.1f"|format([8.0, 8.0 * 2 / cards_per_page] | min) }}mm 10mm;
       border-bottom: 1px dashed rgba(122, 158, 126, 0.4);
     }
     .card-wrapper:last-child {
@@ -180,8 +180,8 @@
   {% for page in pages %}
   <div class="page">
 
-    {% for position in ['top', 'bottom'] %}
-    {% if page[position] is not none %}
+    {% for card in page.cards %}
+    {% if card is not none %}
     <div class="card-wrapper">
       <div class="card">
         <div class="card-header">
@@ -194,7 +194,7 @@
           <p class="card-header__sub">Pon la pegatina en el recuadro de cada canción cuando suene</p>
         </div>
         <div class="card-rows">
-          {% for row in page[position] %}
+          {% for row in card %}
           <div class="card-row">
             {% for cell in row %}
               {% if cell.type == 'song' %}
