@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <style>
     @page {
-      size: A4 portrait;
+      size: A4 {{ "landscape" if cards_per_page == 1 else "portrait" }};
       margin: 0;
     }
 
@@ -21,8 +21,8 @@
     }
 
     .page {
-      width: 210mm;
-      height: 297mm;
+      width: {{ "297mm" if cards_per_page == 1 else "210mm" }};
+      height: {{ "210mm" if cards_per_page == 1 else "297mm" }};
       display: flex;
       flex-direction: column;
       page-break-after: always;
@@ -32,12 +32,13 @@
     }
 
     .card-wrapper {
-      width: 210mm;
-      height: {{ "%.4f"|format(297.0 / cards_per_page) }}mm;
+      flex: 1;
+      width: 100%;
+      min-height: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: {{ "%.1f"|format([8.0, 8.0 * 2 / cards_per_page] | min) }}mm 10mm;
+      padding: {{ [8, (16 // cards_per_page)] | min }}mm 10mm;
       border-bottom: 1px dashed rgba(122, 158, 126, 0.4);
     }
     .card-wrapper:last-child {

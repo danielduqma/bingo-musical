@@ -9,7 +9,6 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
 
-FILLER_SYMBOLS = ["♪", "★", "♫", "🎵", "🎶", "🎸", "🎤"]
 CARD_ROWS = 2
 CARD_COLS = 5
 MIN_SONGS_PER_ROW = 3
