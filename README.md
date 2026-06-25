@@ -85,8 +85,8 @@ Al ejecutar con este CSV, el modo duración se activa automáticamente:
 
 ```
 Modo duración activo:
-  · Línea en canción #4: "Smells Like Teen Spirit" – Nirvana (cartón 1, página 1)
-  · Bingo en canción #8: "Creep" – Radiohead (cartón 2, página 1)
+  · Línea en canción #4: "Smells Like Teen Spirit" – Nirvana (cartón 1 → página 1, posición 1 de 2)
+  · Bingo en canción #8: "Creep" – Radiohead (cartón 2 → página 1, posición 2 de 2)
   · El cartón de línea y el cartón de bingo son distintos.
 ```
 
@@ -98,9 +98,9 @@ uv run --with weasyprint,jinja2 python3 generate_bingo.py songs.csv --count 10 -
 
 ```
 Modo duración activo:
-  · Primera línea en canción #4: "Smells Like Teen Spirit" – Nirvana (cartón 1, página 1)
-  · Segunda línea en canción #6: "Stairway to Heaven" – Led Zeppelin (cartón 2, página 1)
-  · Bingo en canción #8: "Creep" – Radiohead (cartón 3, página 2)
+  · Primera línea en canción #4: "Smells Like Teen Spirit" – Nirvana (cartón 1 → página 1, posición 1 de 2)
+  · Segunda línea en canción #6: "Stairway to Heaven" – Led Zeppelin (cartón 2 → página 1, posición 2 de 2)
+  · Bingo en canción #8: "Creep" – Radiohead (cartón 3 → página 2, posición 1 de 2)
   · Los tres cartones con premio son distintos.
 ```
 

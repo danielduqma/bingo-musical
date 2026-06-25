@@ -403,8 +403,10 @@ def generate_pdf(
     if duration_mode:
         primera_linea_song = ordered_songs[linea_pos - 1]
         bingo_song = ordered_songs[bingo_pos - 1]
-        def _card_page(card_num: int) -> int:
-            return (card_num - 1) // cards_per_page + 1
+        def _card_location(card_num: int) -> str:
+            page = (card_num - 1) // cards_per_page + 1
+            pos = (card_num - 1) % cards_per_page + 1
+            return f"página {page}, posición {pos} de {cards_per_page}"
         if segunda_linea:
             segunda_linea_song = ordered_songs[segunda_linea_pos - 1]
             bingo_card_num = 3
@@ -412,13 +414,13 @@ def generate_pdf(
                 f"Modo duración activo:\n"
                 f"  · Primera línea en canción #{linea_pos}: "
                 f'"{primera_linea_song["title"]}" – {primera_linea_song["artist"]} '
-                f"(cartón 1, página {_card_page(1)})\n"
+                f"(cartón 1 → {_card_location(1)})\n"
                 f"  · Segunda línea en canción #{segunda_linea_pos}: "
                 f'"{segunda_linea_song["title"]}" – {segunda_linea_song["artist"]} '
-                f"(cartón 2, página {_card_page(2)})\n"
+                f"(cartón 2 → {_card_location(2)})\n"
                 f"  · Bingo en canción #{bingo_pos}: "
                 f'"{bingo_song["title"]}" – {bingo_song["artist"]} '
-                f"(cartón {bingo_card_num}, página {_card_page(bingo_card_num)})\n"
+                f"(cartón {bingo_card_num} → {_card_location(bingo_card_num)})\n"
                 "  · Los tres cartones con premio son distintos."
             )
         else:
@@ -427,10 +429,10 @@ def generate_pdf(
                 f"Modo duración activo:\n"
                 f"  · Línea en canción #{linea_pos}: "
                 f'"{primera_linea_song["title"]}" – {primera_linea_song["artist"]} '
-                f"(cartón 1, página {_card_page(1)})\n"
+                f"(cartón 1 → {_card_location(1)})\n"
                 f"  · Bingo en canción #{bingo_pos}: "
                 f'"{bingo_song["title"]}" – {bingo_song["artist"]} '
-                f"(cartón {bingo_card_num}, página {_card_page(bingo_card_num)})\n"
+                f"(cartón {bingo_card_num} → {_card_location(bingo_card_num)})\n"
                 "  · El cartón de línea y el cartón de bingo son distintos."
             )
     print(f"PDF generado: {output_path} ({n_pages} página(s), {count} cartones)")
