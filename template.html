@@ -32,9 +32,8 @@
     }
 
     .card-wrapper {
-      flex: 1;
       width: 100%;
-      min-height: 0;
+      height: {{ (210 if cards_per_page == 1 else 297 / cards_per_page) | round(1) }}mm;
       display: flex;
       align-items: center;
       justify-content: center;
