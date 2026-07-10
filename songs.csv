@@ -1,16 +1,16 @@
-Grupo/artista,Canción
-Queen,Bohemian Rhapsody
-The Beatles,Hey Jude
-Michael Jackson,Thriller
-Nirvana,Smells Like Teen Spirit
-David Bowie,Heroes
-Led Zeppelin,Stairway to Heaven
-Pink Floyd,Wish You Were Here
-Radiohead,Creep
-The Rolling Stones,Paint It Black
-Fleetwood Mac,Go Your Own Way
-ABBA,Dancing Queen
-Beyoncé,Crazy in Love
-Daft Punk,Get Lucky
-Amy Winehouse,Rehab
-Adele,Rolling in the Deep
+Grupo/artista,Canción,Orden
+Queen,Bohemian Rhapsody,1
+The Beatles,Hey Jude,2
+Michael Jackson,Thriller,3
+Nirvana,Smells Like Teen Spirit,4
+David Bowie,Heroes,5
+Led Zeppelin,Stairway to Heaven,6
+Pink Floyd,Wish You Were Here,7
+Radiohead,Creep,8
+The Rolling Stones,Paint It Black,
+Fleetwood Mac,Go Your Own Way,
+ABBA,Dancing Queen,
+Beyoncé,Crazy in Love,
+Daft Punk,Get Lucky,
+Amy Winehouse,Rehab,
+Adele,Rolling in the Deep,
