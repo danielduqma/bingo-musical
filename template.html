@@ -38,10 +38,24 @@
       align-items: center;
       justify-content: center;
       padding: {{ [8, (16 // cards_per_page)] | min }}mm 10mm;
-      border-bottom: 1px dashed rgba(122, 158, 126, 0.4);
+      position: relative;
     }
-    .card-wrapper:last-child {
-      border-bottom: none;
+    .card-wrapper:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        rgba(122, 158, 126, 0.5) 0mm,
+        rgba(122, 158, 126, 0.5) 6mm,
+        transparent 6mm,
+        transparent calc(100% - 6mm),
+        rgba(122, 158, 126, 0.5) calc(100% - 6mm),
+        rgba(122, 158, 126, 0.5) 100%
+      );
     }
 
     /* ── Cartón: sin borde exterior ── */
@@ -151,7 +165,7 @@
     }
     .cell-song .title {
       font-family: Georgia, 'Times New Roman', serif;
-      font-size: 12pt;
+      font-size: 15pt;
       font-weight: normal;
       color: #2C2C2C;
       line-height: 1.3;
